@@ -33,7 +33,7 @@
 - Phaser 숲 씬
 - 포커스 타이머 (visibility 기반)
 - 캡처 모달 UI
-- Solana 지갑 연결 (Phantom, Solflare, Backpack)
+- Solana 지갑 연결 (Phantom, Solflare)
 - 기본 레이아웃/스타일
 
 ## Solana 설정
@@ -57,7 +57,7 @@ http://localhost:3000
 ## 확인 방법
 
 1. 상단 **Select Wallet** 클릭
-2. Phantom/Solflare/Backpack 연결
+2. Phantom/Solflare 연결
 3. 타이머 시작 → 완료 후 캡처 모달 표시
 
 ## 프로젝트 구조

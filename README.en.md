@@ -32,7 +32,7 @@ Reading grows into a forest. Personal mode and team mode can be used at the same
 - Phaser forest scene
 - Focus timer with visibility detection
 - Capture modal UI
-- Solana wallet connect (Phantom, Solflare, Backpack)
+- Solana wallet connect (Phantom, Solflare)
 - Basic layout/styles
 
 ## Solana Setup
@@ -56,7 +56,7 @@ Open http://localhost:3000
 ## Verify
 
 1. Click **Select Wallet**
-2. Connect Phantom/Solflare/Backpack
+2. Connect Phantom/Solflare
 3. Start the timer -> capture modal appears on completion
 
 ## Project Structure
