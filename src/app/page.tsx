@@ -41,7 +41,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="font-bold">SUMTEO</h1>
-              <p className="text-xs text-gray-400">Web3 Habit Metaverse</p>
+              <p className="text-xs text-gray-400">Onchain Reading Garden</p>
             </div>
           </div>
           <WalletButton />
@@ -80,7 +80,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="p-4 text-center text-gray-500 text-sm">
-          <p>Built for Avalanche | Proof of Time Protocol</p>
+          <p>Built for Solana | Reading Garden Prototype</p>
         </footer>
       </div>
 

@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SUMTEO | Web3 Habit Metaverse",
-  description: "시간이 잉크($INK)가 되고, 습관이 자산이 된다",
+  title: "SUMTEO | Reading Garden",
+  description: "Reading habits that grow into a forest",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

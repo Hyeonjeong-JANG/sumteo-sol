@@ -1,43 +1,43 @@
 # SUMTEO
 
-[English version](README.en.md)
+[Korean version](README.md)
 
-숲 배경, 포커스 타이머, Solana 지갑 연결을 포함한 독서 습관 프로토타입입니다.
+Prototype UI for a reading habit app with a forest scene, focus timer, and Solana wallet connect.
 
-## 구현된 기능
+## Implemented
 
 - Next.js App Router
-- Phaser 숲 씬
-- 포커스 타이머 (visibility 기반)
-- 캡처 모달 UI
-- Solana 지갑 연결 (Phantom, Solflare, Backpack)
-- 기본 레이아웃/스타일
+- Phaser forest scene
+- Focus timer with visibility detection
+- Capture modal UI
+- Solana wallet connect (Phantom, Solflare, Backpack)
+- Basic layout/styles
 
-## Solana 설정
+## Solana Setup
 
-- 기본 네트워크: `devnet`
-- 선택 환경변수:
+- Default network: `devnet`
+- Optional env vars:
   - `NEXT_PUBLIC_SOLANA_NETWORK=devnet|testnet|mainnet-beta`
   - `NEXT_PUBLIC_SOLANA_RPC=https://...`
 
-필요하면 `.env.local`을 생성해 설정하세요.
+Create `.env.local` if you want to override the defaults.
 
-## 실행
+## Run
 
 ```bash
 npm install
 npm run dev
 ```
 
-http://localhost:3000
+Open http://localhost:3000
 
-## 확인 방법
+## Verify
 
-1. 상단 **Select Wallet** 클릭
-2. Phantom/Solflare/Backpack 연결
-3. 타이머 시작 → 완료 후 캡처 모달 표시
+1. Click **Select Wallet**
+2. Connect Phantom/Solflare/Backpack
+3. Start the timer -> capture modal appears on completion
 
-## 프로젝트 구조
+## Project Structure
 
 ```
 sumteo/
