@@ -1,8 +1,30 @@
-# SUMTEO
+# SUMTEO Reading Garden
 
 [Korean version](README.md)
 
-Prototype UI for a reading habit app with a forest scene, focus timer, and Solana wallet connect.
+Reading grows into a forest. Personal mode and team mode can be used at the same time.
+
+## Personal Mode
+
+- Start with a 30-minute reading timer
+- Save a favorite line + one sentence
+- Tree growth and a personal garden
+
+## Team Mode
+
+- Create a team forest with weekly goals
+- Shared tree growth for the team
+- Team activity visibility
+- Visit gardens, water trees, view reflections
+
+## Mobile UX Structure
+
+- Home/Garden: personal forest, today goal, start button
+- Reading session: 30-min timer + focus detection
+- Reflection: favorite line + one sentence
+- Growth result: tree animation + save today log
+- Team forest: weekly goal, shared tree, team status
+- Explore: visit gardens, water trees, view lines
 
 ## Implemented
 
