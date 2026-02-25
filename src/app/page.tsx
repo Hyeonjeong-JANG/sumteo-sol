@@ -49,12 +49,20 @@ export default function Home() {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-center px-4 gap-8">
-          {/* INK Balance */}
-          <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl px-6 py-4 text-center">
-            <p className="text-gray-400 text-sm">Your $INK Balance</p>
-            <p className="text-3xl font-bold text-emerald-400">
-              {inkEarned.toLocaleString()} INK
-            </p>
+          {/* INK Balance + Social Badge */}
+          <div className="flex items-center gap-3">
+            <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl px-6 py-4 text-center">
+              <p className="text-gray-400 text-sm">Your $INK Balance</p>
+              <p className="text-3xl font-bold text-emerald-400">
+                {inkEarned.toLocaleString()} INK
+              </p>
+            </div>
+            <div className="bg-gray-900/80 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="text-sm text-gray-200 whitespace-nowrap">
+                함께 읽는 중 <strong className="text-emerald-400">3명</strong>
+              </span>
+            </div>
           </div>
 
           {/* Timer */}

@@ -4,6 +4,7 @@ export class ForestScene extends Phaser.Scene {
   private trees: Phaser.GameObjects.Graphics[] = [];
   private particles: Phaser.GameObjects.Graphics[] = [];
   private cabin!: Phaser.GameObjects.Graphics;
+  private characters: Phaser.GameObjects.Container[] = [];
 
   constructor() {
     super({ key: "ForestScene" });
@@ -27,6 +28,9 @@ export class ForestScene extends Phaser.Scene {
 
     // Draw cabin
     this.drawCabin(width / 2, height - 150);
+
+    // Draw reading space (benches + characters)
+    this.drawReadingSpace(width / 2, height - 150);
 
     // Floating particles (fireflies)
     this.createFireflies(width, height);
@@ -126,6 +130,107 @@ export class ForestScene extends Phaser.Scene {
         ease: "Sine.easeInOut",
       });
     }
+  }
+
+  private drawReadingSpace(cabinX: number, cabinY: number) {
+    // Bench positions: left, center, right relative to cabin
+    const benchPositions = [
+      { x: cabinX - 130, y: cabinY + 10 },
+      { x: cabinX, y: cabinY + 30 },
+      { x: cabinX + 130, y: cabinY + 10 },
+    ];
+
+    // Draw benches
+    benchPositions.forEach((pos) => {
+      this.drawBench(pos.x, pos.y);
+    });
+
+    // Character data
+    const characters = [
+      { name: "친구1", x: benchPositions[0].x, y: benchPositions[0].y, color: 0xd4a574, highlight: 0x8b6914 },
+      { name: "나", x: benchPositions[1].x, y: benchPositions[1].y, color: 0xd4a574, highlight: 0x10b981 },
+      { name: "친구2", x: benchPositions[2].x, y: benchPositions[2].y, color: 0xd4a574, highlight: 0xc4841d },
+    ];
+
+    characters.forEach((char, i) => {
+      const container = this.drawCharacter(char.x, char.y, char.name, char.highlight, i === 1);
+      this.characters.push(container);
+
+      // Breathing animation — slight vertical bob
+      this.tweens.add({
+        targets: container,
+        y: container.y - 2,
+        duration: 1800 + i * 400,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.easeInOut",
+      });
+    });
+  }
+
+  private drawBench(x: number, y: number) {
+    const bench = this.add.graphics();
+
+    // Bench seat
+    bench.fillStyle(0x5c3a21);
+    bench.fillRect(x - 35, y - 5, 70, 8);
+
+    // Bench legs
+    bench.fillStyle(0x3d2817);
+    bench.fillRect(x - 30, y + 3, 6, 15);
+    bench.fillRect(x + 24, y + 3, 6, 15);
+  }
+
+  private drawCharacter(
+    x: number,
+    y: number,
+    name: string,
+    highlightColor: number,
+    isMe: boolean
+  ): Phaser.GameObjects.Container {
+    const container = this.add.container(x, y - 30);
+
+    const gfx = this.add.graphics();
+
+    // Body (rectangle)
+    gfx.fillStyle(highlightColor);
+    gfx.fillRect(-10, -8, 20, 22);
+
+    // Head (circle)
+    gfx.fillStyle(0xd4a574);
+    gfx.fillCircle(0, -18, 10);
+
+    // Book (small rectangle in front)
+    gfx.fillStyle(0xf5f5dc);
+    gfx.fillRect(-8, 2, 16, 10);
+    // Book spine
+    gfx.fillStyle(highlightColor, 0.7);
+    gfx.fillRect(-1, 2, 2, 10);
+
+    container.add(gfx);
+
+    // Name label above head
+    const label = this.add.text(0, -36, name, {
+      fontSize: "11px",
+      color: "#ffffff",
+      fontFamily: "sans-serif",
+    });
+    label.setOrigin(0.5, 1);
+    container.add(label);
+
+    // Sapling next to "나" character (reading progress visualization)
+    if (isMe) {
+      const sapling = this.add.graphics();
+      // Stem
+      sapling.fillStyle(0x10b981);
+      sapling.fillRect(22, -8, 3, 16);
+      // Leaves
+      sapling.fillStyle(0x34d399);
+      sapling.fillTriangle(23, -18, 16, -6, 30, -6);
+      container.add(sapling);
+    }
+
+    return container;
   }
 
   private drawMoon(x: number, y: number) {
