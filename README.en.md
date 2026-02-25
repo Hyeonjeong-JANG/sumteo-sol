@@ -2,25 +2,28 @@
 
 [Korean version](README.md)
 
-Your own garden and reading space. Set a goal when you start a new book — a sapling is planted. After each reading session, submit your progress. The tree grows in proportion to how far you've read. Finish the book and the tree blooms, minted as a Solana cNFT.
+> "When was the last time you actually finished a book?"
+
+6 out of 10 adults fail to finish even one book per year (Korea Ministry of Culture, 2023 National Reading Survey). The problem isn't willpower — it's reading alone. Just as studying in a cafe somehow makes you focus better, Sumteo recreates "reading together" digitally.
 
 ## Core Concept
 
-### Set Goals → Read → Grow Trees
+### Set Goals → Read → Grow Trees → Mint cNFT
 
 - Set your own reading goal when starting a book ("finish in 2 weeks", "read 30 min daily")
-- Submit reading progress after each session
+- Verify reading progress with camera capture after each session
 - Progress directly maps to tree growth — halfway through the book, tree is half grown
-- Finish a book → tree blooms → cNFT minted
-- Start next book → new sapling planted
+- Finish a book → tree blooms → **Solana cNFT minted** (Metaplex Bubblegum)
+- Every reading session stored on-chain as **Proof of Reading** (SPL Memo)
 
-### Reading Together
+### Social Presence (Key Differentiator)
+
+Unlike Read-to-Earn platforms (Read2N etc.), Sumteo's core motivation is **social presence, not token rewards**.
 
 - Sit in the reading space and see others reading right now
-- Read in your own garden or visit a friend's garden to read together
-- Read together anywhere — no boundaries between gardens
-- Water a friend's tree to send encouragement
-- Share favorite passages and one-line reflections
+- Live reader dashboard: who's reading what, and for how long
+- Inspired by millions watching lo-fi study streams — "alone, but together"
+- Visit friends' gardens and water their trees to encourage them
 
 ### Solo & Team Goals
 
@@ -29,9 +32,19 @@ Your own garden and reading space. Set a goal when you start a new book — a sa
 
 ## Why Solana
 
-- cNFT (Compressed NFT) minted on each book completion — state compression keeps cost under $0.001
-- Real-time social interactions (garden visits, watering, passage recording) — 400ms finality
-- Users never think about gas fees — seamless on-chain experience
+| | Regular NFT | Solana cNFT |
+|---|---|---|
+| Mint cost | ~$2.00 | **< $0.001** |
+| Finality | 10s~minutes | **0.4s** |
+| User experience | Gas fee friction | **Invisible cost** |
+
+Compressed NFTs (cNFTs) use state compression to achieve **1000x cost reduction** vs regular NFTs. Mint a tree for every book you finish with zero cost concern.
+
+## Market Size
+
+- **TAM**: Global digital reading market $23B (Statista, 2024)
+- **SAM**: Social/gamified reading apps $2.3B (10%, includes Goodreads, reading challenges)
+- **SOM**: Web3 social reading (cNFT collection + social presence) $230M — initial target: Korean & Japanese Gen MZ reading communities
 
 ## Revenue Model
 
@@ -42,18 +55,29 @@ Your own garden and reading space. Set a goal when you start a new book — a sa
 
 ## Implemented
 
+### Frontend
 - Next.js App Router + TypeScript mobile-first UI
-- Phaser 3 garden visualization (trees, cabin, firefly animations)
+- Phaser 3 garden visualization (trees, cabin, fireflies, character breathing animations)
 - Focus timer with visibility-based pause detection
 - Camera capture for reading verification
+
+### On-chain (Solana Devnet)
+- **cNFT Minting**: Metaplex Bubblegum compressed NFT trees on book completion
+- **Proof of Reading**: SPL Memo program for on-chain reading records
+- **Reading Garden**: Merkle tree-based garden (up to 8 cNFTs)
 - Solana wallet connect (Phantom, Solflare)
+
+### Social
+- Live reader presence (names, books, reading time)
+- Activity feed (join notifications, chapter completion)
+- Real-time reader count
 
 ## Next Steps
 
-- On-chain cNFT minting (tree NFT on book completion)
-- Real-time co-reading (see other users in your garden)
 - Garden visiting and tree watering
 - Team gardens and shared goals
+- Reading progress-based tree growth visualization (staged animations)
+- Passage sharing and one-line reflections
 
 ## Solana Setup
 
@@ -73,27 +97,33 @@ npm run dev
 
 Open http://localhost:3000
 
-## Verify
+## Demo Flow
 
-1. Click **Select Wallet**
-2. Connect Phantom/Solflare
-3. Start the timer → capture modal appears on completion
+1. Click **Select Wallet** → Connect Phantom/Solflare (Devnet)
+2. Start focus timer → complete → camera verification
+3. Click **Mint & Record On-chain** → Proof of Reading record + cNFT mint
+4. Check on-chain transactions via Solana Explorer links
 
 ## Project Structure
 
 ```
 sumteo/
 ├── src/
-│   ├── app/                 # Next.js App Router
-│   ├── components/          # React Components
-│   │   ├── Timer.tsx        # Focus Timer
-│   │   ├── WalletButton.tsx # Solana Wallet Button
-│   │   ├── CaptureModal.tsx # Photo Capture UI
-│   │   └── GameCanvas.tsx   # Phaser Wrapper
-│   ├── game/                # Phaser Scenes
-│   │   └── ForestScene.ts   # Garden Scene
-│   └── hooks/               # Custom Hooks
-│       └── useTimer.ts      # Timer Logic
+│   ├── app/                    # Next.js App Router
+│   ├── components/             # React Components
+│   │   ├── Timer.tsx           # Focus Timer
+│   │   ├── WalletButton.tsx    # Solana Wallet Button
+│   │   ├── CaptureModal.tsx    # Photo Capture UI
+│   │   ├── MintTreeButton.tsx  # cNFT Minting UI
+│   │   └── GameCanvas.tsx      # Phaser Wrapper
+│   ├── game/                   # Phaser Scenes
+│   │   └── ForestScene.ts      # Garden Scene
+│   ├── hooks/                  # Custom Hooks
+│   │   ├── useTimer.ts         # Timer Logic
+│   │   └── useReadingRoom.ts   # Social Presence
+│   └── lib/solana/             # Solana Integration
+│       ├── cnft.ts             # cNFT Minting (Bubblegum)
+│       └── proof.ts            # Proof of Reading (Memo)
 └── public/
-    └── manifest.json        # PWA Manifest
+    └── manifest.json           # PWA Manifest
 ```
