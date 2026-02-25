@@ -1,39 +1,59 @@
-# SUMTEO Reading Garden
+# SUMTEO — A Social Reading Platform Where Books Grow Into Forests
 
 [Korean version](README.md)
 
-Reading grows into a forest. Personal mode and team mode can be used at the same time.
+Your own garden and reading space. Set a goal when you start a new book — a sapling is planted. After each reading session, submit your progress. The tree grows in proportion to how far you've read. Finish the book and the tree blooms, minted as a Solana cNFT.
 
-## Personal Mode
+## Core Concept
 
-- Start with a 30-minute reading timer
-- Save a favorite line + one sentence
-- Tree growth and a personal garden
+### Set Goals → Read → Grow Trees
 
-## Team Mode
+- Set your own reading goal when starting a book ("finish in 2 weeks", "read 30 min daily")
+- Submit reading progress after each session
+- Progress directly maps to tree growth — halfway through the book, tree is half grown
+- Finish a book → tree blooms → cNFT minted
+- Start next book → new sapling planted
 
-- Create a team forest with weekly goals
-- Shared tree growth for the team
-- Team activity visibility
-- Visit gardens, water trees, view reflections
+### Reading Together
 
-## Mobile UX Structure
+- Sit in the reading space and see others reading right now
+- Read in your own garden or visit a friend's garden to read together
+- Read together anywhere — no boundaries between gardens
+- Water a friend's tree to send encouragement
+- Share favorite passages and one-line reflections
 
-- Home/Garden: personal forest, today goal, start button
-- Reading session: 30-min timer + focus detection
-- Reflection: favorite line + one sentence
-- Growth result: tree animation + save today log
-- Team forest: weekly goal, shared tree, team status
-- Explore: visit gardens, water trees, view lines
+### Solo & Team Goals
+
+- **Solo**: "Grow 3 trees this month"
+- **Team**: Create a team garden and achieve goals together
+
+## Why Solana
+
+- cNFT (Compressed NFT) minted on each book completion — state compression keeps cost under $0.001
+- Real-time social interactions (garden visits, watering, passage recording) — 400ms finality
+- Users never think about gas fees — seamless on-chain experience
+
+## Revenue Model
+
+1. Premium subscription (team garden expansion, rare tree cNFTs)
+2. Tree NFT IP-based merchandise (stickers, collectible cards, postcards)
+3. Publisher/author partnerships (reading challenge sponsors)
+4. Reading data-driven recommendation service
 
 ## Implemented
 
-- Next.js App Router
-- Phaser forest scene
-- Focus timer with visibility detection
-- Capture modal UI
+- Next.js App Router + TypeScript mobile-first UI
+- Phaser 3 garden visualization (trees, cabin, firefly animations)
+- Focus timer with visibility-based pause detection
+- Camera capture for reading verification
 - Solana wallet connect (Phantom, Solflare)
-- Basic layout/styles
+
+## Next Steps
+
+- On-chain cNFT minting (tree NFT on book completion)
+- Real-time co-reading (see other users in your garden)
+- Garden visiting and tree watering
+- Team gardens and shared goals
 
 ## Solana Setup
 
@@ -57,7 +77,7 @@ Open http://localhost:3000
 
 1. Click **Select Wallet**
 2. Connect Phantom/Solflare
-3. Start the timer -> capture modal appears on completion
+3. Start the timer → capture modal appears on completion
 
 ## Project Structure
 
@@ -71,7 +91,7 @@ sumteo/
 │   │   ├── CaptureModal.tsx # Photo Capture UI
 │   │   └── GameCanvas.tsx   # Phaser Wrapper
 │   ├── game/                # Phaser Scenes
-│   │   └── ForestScene.ts   # Forest Scene
+│   │   └── ForestScene.ts   # Garden Scene
 │   └── hooks/               # Custom Hooks
 │       └── useTimer.ts      # Timer Logic
 └── public/
