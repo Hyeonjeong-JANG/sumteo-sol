@@ -134,7 +134,7 @@ export class SumteoZepScene extends Phaser.Scene {
       if (this.textures.exists(key)) return;
       const w = layout[0].length;
       const h = layout.length;
-      const g = this.make.graphics({x: 0, y: 0, add: false});
+      const g = this.make.graphics({x: 0, y: 0});
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
           const c = layout[y][x];
@@ -294,7 +294,7 @@ export class SumteoZepScene extends Phaser.Scene {
         slice.fillCircle(4, 4, 1.5);
         slice.fillCircle(0, 7, 1.5);
         
-        wm.add(slice);
+        slice.setDepth(depth + 10);
     };
 
     // Arrange a few slices

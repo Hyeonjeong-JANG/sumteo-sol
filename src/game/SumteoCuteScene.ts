@@ -17,7 +17,6 @@ interface SeatPosition {
   y: number;
   occupied: boolean;
   characterIndex: number | null;
-  angle: number;           // NEW: Circular angle
 }
 
 interface HourglassData {
@@ -29,19 +28,19 @@ interface HourglassData {
 }
 
 const CHARACTER_DATA = [
-  { name: "빵돌이", highlight: 0x8b6914, minutes: 42, active: true, seatIndex: 0 },
-  { name: "리누스", highlight: 0xc4841d, minutes: 67, active: false, seatIndex: 4 }, // Changed seatIndex for better distribution
-  { name: "최고의순대", highlight: 0x10b981, minutes: 15, active: true, seatIndex: 2, isMe: true }, // Changed seatIndex for front-ish view
+  { name: "친구1", highlight: 0x8b6914, minutes: 42, active: true, seatIndex: 0 },
+  { name: "친구2", highlight: 0xc4841d, minutes: 67, active: false, seatIndex: 2 },
+  { name: "나", highlight: 0x10b981, minutes: 15, active: true, seatIndex: 3, isMe: true },
 ];
 
-export class ForestScene extends Phaser.Scene {
+export class SumteoCuteScene extends Phaser.Scene {
   private sceneObjects: Phaser.GameObjects.GameObject[] = [];
   private characters: Phaser.GameObjects.Container[] = [];
   private hourglasses: HourglassData[] = [];
   private seatPositions: SeatPosition[] = [];
 
   constructor() {
-    super({ key: "ForestScene" });
+    super({ key: "SumteoCuteScene" });
   }
 
   create() {
@@ -121,6 +120,18 @@ export class ForestScene extends Phaser.Scene {
     moon.fillStyle(0xe8e8c8, 0.5);
     moon.fillCircle(mx - 7, my - 4, 6);
     moon.fillCircle(mx + 6, my + 7, 4);
+    
+    // Add sleepy face into the moon
+    moon.lineStyle(2, 0xbcbc8d, 0.8);
+    moon.beginPath();
+    moon.arc(mx - 5, my - 2, 3, Math.PI * 0.1, Math.PI * 0.9, false);
+    moon.strokePath();
+    moon.beginPath();
+    moon.arc(mx + 5, my - 2, 3, Math.PI * 0.1, Math.PI * 0.9, false);
+    moon.strokePath();
+    moon.fillStyle(0xbcbc8d, 0.8);
+    moon.fillCircle(mx - 8, my + 2, 2);
+    moon.fillCircle(mx + 8, my + 2, 2);
   }
 
   // ── Trees (sides only, clear center for desk) ──
@@ -145,143 +156,143 @@ export class ForestScene extends Phaser.Scene {
 
   private drawTree(x: number, y: number, scale: number, color: number) {
     const tree = this.track(this.add.graphics());
+    // Softer rounded trunk
     tree.fillStyle(0x3d2817);
-    tree.fillRect(x - 8 * scale, y - 60 * scale, 16 * scale, 60 * scale);
+    tree.fillRoundedRect(x - 8 * scale, y - 60 * scale, 16 * scale, 60 * scale, 4 * scale);
 
+    // Milder triangles for leaves
     tree.fillStyle(color);
-    tree.fillTriangle(x, y - 160 * scale, x - 50 * scale, y - 60 * scale, x + 50 * scale, y - 60 * scale);
-    tree.fillTriangle(x, y - 200 * scale, x - 40 * scale, y - 110 * scale, x + 40 * scale, y - 110 * scale);
-    tree.fillTriangle(x, y - 230 * scale, x - 30 * scale, y - 150 * scale, x + 30 * scale, y - 150 * scale);
+    tree.fillTriangle(x, y - 160 * scale, x - 45 * scale, y - 60 * scale, x + 45 * scale, y - 60 * scale);
+    tree.fillTriangle(x, y - 200 * scale, x - 35 * scale, y - 110 * scale, x + 35 * scale, y - 110 * scale);
+    tree.fillTriangle(x, y - 230 * scale, x - 25 * scale, y - 150 * scale, x + 25 * scale, y - 150 * scale);
   }
 
-  // ── Back Wall (Removed to focus on the central stump) ──
+  // ── Back Wall ──
 
   private drawBackWall(w: number, h: number) {
-    // Intentionally left blank to simplify the background and keep focus on the natural elements.
+    const wallY = h * ZONE.BG.end - 40;
+    const wallW = w * 0.55;
+    const wallH = 50;
+    const wallX = (w - wallW) / 2;
+
+    const wall = this.track(this.add.graphics());
+
+    // Wooden planks
+    wall.fillStyle(0x3d2817, 0.7);
+    wall.fillRoundedRect(wallX, wallY, wallW, wallH, 4);
+
+    // Plank lines
+    wall.lineStyle(1, 0x2a1c0e, 0.4);
+    for (let py = wallY + 10; py < wallY + wallH; py += 12) {
+      wall.beginPath();
+      wall.moveTo(wallX, py);
+      wall.lineTo(wallX + wallW, py);
+      wall.strokePath();
+    }
+
+    // Roof overhang
+    wall.fillStyle(0x5c3a21, 0.8);
+    wall.fillTriangle(
+      w / 2, wallY - 22,
+      wallX - 10, wallY + 2,
+      wallX + wallW + 10, wallY + 2
+    );
+
+    // Small window with warm light
+    const winX = w / 2 - 12;
+    const winY = wallY + 12;
+    wall.fillStyle(0xffe066, 0.9);
+    wall.fillRoundedRect(winX, winY, 24, 20, 6);
+    wall.lineStyle(2, 0x5c3a21, 0.9);
+    wall.strokeRoundedRect(winX, winY, 24, 20, 6);
+    wall.beginPath();
+    wall.moveTo(winX + 12, winY);
+    wall.lineTo(winX + 12, winY + 20);
+    wall.strokePath();
+
+    // Window glow
+    const glow = this.track(this.add.graphics());
+    glow.fillStyle(0xffd700, 0.12);
+    glow.fillCircle(w / 2, winY + 10, 35);
   }
 
-  // ── Shared Desk (Now a Tree Stump) ──
+  // ── Shared Desk ──
 
   private drawDesk(w: number, h: number) {
-    const cx = w / 2;
-    const cy = h * 0.72;
-    const deskR_X = Math.min(w * 0.22, 180);
-    const deskR_Y = deskR_X * 0.45;
-    const stumpHeight = 25;
+    const deskW = w * DESK_WIDTH_RATIO;
+    const deskX = (w - deskW) / 2;
+    const deskY = h * 0.67;
+    const deskH = 12;
 
     const desk = this.track(this.add.graphics());
 
     // Shadow
-    desk.fillStyle(0x000000, 0.25);
-    desk.fillEllipse(cx, cy + stumpHeight + 8, deskR_X * 1.15, deskR_Y * 1.15);
+    desk.fillStyle(0x000000, 0.15);
+    desk.fillRoundedRect(deskX + 4, deskY + 3, deskW, deskH, 4);
 
-    // Stump Bark (Sides)
-    desk.fillStyle(0x3d2314);
-    desk.fillRect(cx - deskR_X, cy, deskR_X * 2, stumpHeight);
-    
-    // Bottom curve of stump
-    desk.fillEllipse(cx, cy + stumpHeight, deskR_X, deskR_Y);
+    // Table top
+    desk.fillStyle(0x6b4226);
+    desk.fillRoundedRect(deskX, deskY, deskW, deskH, 6);
 
-    // Bark Texture (Lines on the side)
-    desk.lineStyle(2, 0x24140b, 0.6);
-    for (let i = 1; i < 9; i++) {
-        const lineX = cx - deskR_X + (deskR_X * 2 / 9) * i;
-        desk.beginPath();
-        desk.moveTo(lineX, cy + Math.random() * 5);
-        desk.lineTo(lineX + (Math.random()*4 - 2), cy + stumpHeight);
-        desk.strokePath();
-    }
+    // Wood grain highlight
+    desk.fillStyle(0x7d5233, 0.6);
+    desk.fillRoundedRect(deskX + 2, deskY + 1, deskW - 4, 4, 2);
 
-    // Stump Top (Cut wood)
-    desk.fillStyle(0xcdae7e); // Lighter wood color
-    desk.fillEllipse(cx, cy, deskR_X, deskR_Y);
-
-    // Tree Rings (Age rings on top)
-    desk.lineStyle(1.5, 0xa58253, 0.5);
-    desk.beginPath();
-    desk.strokeEllipse(cx, cy, deskR_X * 0.85, deskR_Y * 0.85);
-    desk.strokeEllipse(cx, cy, deskR_X * 0.6, deskR_Y * 0.6);
-    desk.strokeEllipse(cx, cy, deskR_X * 0.35, deskR_Y * 0.35);
-    desk.strokeEllipse(cx, cy, deskR_X * 0.15, deskR_Y * 0.15);
-
-    // A small lantern in the center for cozy atmosphere
-    desk.fillStyle(0x222222);
-    desk.fillRect(cx - 8, cy - 12, 16, 12);
-    desk.fillStyle(0xffd700, 0.8); // lantern glow
-    desk.fillCircle(cx, cy - 6, 6);
-    desk.fillStyle(0xfff5e6);      // lantern core
-    desk.fillCircle(cx, cy - 6, 3);
-    desk.fillStyle(0x111111);      // lantern roof
-    desk.fillTriangle(cx, cy - 20, cx - 10, cy - 12, cx + 10, cy - 12);
-
-    // Ambient glow from the lantern
-    const glow = this.track(this.add.graphics());
-    glow.fillStyle(0xffd700, 0.15);
-    glow.fillCircle(cx, cy - 6, 45);
-
-    // Make sure the desk gets sorted correctly in depth (between top and bottom seated characters)
-    desk.setDepth(cy); 
+    // Desk legs (rounder)
+    desk.fillStyle(0x4a2d14);
+    const legW = 8;
+    desk.fillRoundedRect(deskX + 16, deskY + deskH - 2, legW, 28, 4);
+    desk.fillRoundedRect(deskX + deskW - 24, deskY + deskH - 2, legW, 28, 4);
   }
 
-  // ── Stools (Arranged circularly around stump) ──
+  // ── Stools ──
 
   private drawStools(w: number, h: number) {
-    const cx = w / 2;
-    const cy = h * 0.72;
-    const deskR_X = Math.min(w * 0.22, 180);
-    const deskR_Y = deskR_X * 0.45;
-    
-    // Snug against the stump
-    const seatDistX = deskR_X - 10;
-    const seatDistY = deskR_Y - 5;
+    const deskW = w * DESK_WIDTH_RATIO;
+    const deskX = (w - deskW) / 2;
+    const stoolY = h * 0.67 + 10 + 28 + 2; 
 
     this.seatPositions = [];
 
-    // Angles for circular arrangement
-    const angles = [
-      260, // 0: Top Left-ish
-      340, // 1: Top Right-ish
-      40,  // 2: Bottom Right-ish
-      90,  // 3: Bottom
-      140, // 4: Bottom Left-ish
-      200  // 5: Top Left
-    ];
-
     for (let i = 0; i < SEAT_COUNT; i++) {
-      const rad = Phaser.Math.DegToRad(angles[i]);
-      const seatX = cx + Math.cos(rad) * seatDistX;
-      
-      // FIX Y depth order overlapping - make front characters slightly lower 
-      // compared to the stump so they render cleanly in front.
-      const seatY = cy + Math.sin(rad) * seatDistY + (Math.sin(rad) < 0 ? -25 : 15);
-
+      const seatX = deskX + (deskW / (SEAT_COUNT + 1)) * (i + 1);
       const charData = CHARACTER_DATA.find((c) => c.seatIndex === i);
       const occupied = !!charData;
 
       this.seatPositions.push({
         x: seatX,
-        y: seatY,
+        y: stoolY,
         occupied,
         characterIndex: charData ? CHARACTER_DATA.indexOf(charData) : null,
-        angle: angles[i],
       });
 
-      this.drawStool(seatX, seatY, occupied);
+      this.drawStool(seatX, stoolY, occupied);
     }
   }
 
   private drawStool(x: number, y: number, occupied: boolean) {
-    // Only show a subtle glow for empty seats to indicate you can sit there.
-    // We completely remove any "brown graphical blocks" (stools) to prevent rendering bugs.
+    const stool = this.track(this.add.graphics());
+    const alpha = occupied ? 1 : 0.4;
+
+    // Soft stool seat
+    stool.fillStyle(0x5c3a21, alpha);
+    stool.fillCircle(x, y, 12);
+    stool.fillStyle(0x6b4226, alpha * 0.8);
+    stool.fillCircle(x, y - 1, 10);
+
+    // Single leg (rounder)
+    stool.fillStyle(0x3d2817, alpha);
+    stool.fillRoundedRect(x - 3, y + 8, 6, 14, 3);
+
+    // Glow for empty seats
     if (!occupied) {
       const glow = this.track(this.add.graphics());
       glow.fillStyle(0xffd700, 0.08);
-      glow.fillCircle(x, y - 5, 18);
-      glow.setDepth(y - 5);
+      glow.fillCircle(x, y, 16);
 
       this.tweens.add({
         targets: glow,
-        alpha: { from: 0.2, to: 0.9 },
+        alpha: { from: 0.4, to: 0.9 },
         duration: 2000,
         yoyo: true,
         repeat: -1,
@@ -290,27 +301,28 @@ export class ForestScene extends Phaser.Scene {
     }
   }
 
-  // ── Characters ──
+  // ── Characters (New Cute Design!) ──
 
   private drawCharacters(w: number, h: number) {
+    const deskY = h * 0.67;
+
     CHARACTER_DATA.forEach((charData, idx) => {
       const seat = this.seatPositions[charData.seatIndex];
       if (!seat) return;
 
-      const charY = seat.y - 12; // sit on the stool
-      const container = this.drawCharacter(seat.x, charY, charData.name, charData.highlight, !!charData.isMe, seat.angle);
-      
-      // Calculate depth based on Y position so bottom characters overlay top characters
-      container.setDepth(seat.y);
+      const charY = deskY - 8; 
+      const container = this.drawCharacter(seat.x, charY, charData.name, charData.highlight, !!charData.isMe);
       this.characters.push(container);
 
-      // Hourglass above head (inside character container)
+      // Hourglass
       this.drawHourglassAboveHead(container, charData.minutes, charData.active);
 
-      // Breathing animation
+      // Cute breathing/bouncing animation
       this.tweens.add({
         targets: container,
-        y: container.y - 2,
+        scaleY: 1.04,
+        scaleX: 0.98,
+        y: container.y - 3,
         duration: 1800 + idx * 400,
         yoyo: true,
         repeat: -1,
@@ -324,90 +336,112 @@ export class ForestScene extends Phaser.Scene {
     y: number,
     name: string,
     highlightColor: number,
-    isMe: boolean,
-    angle: number
+    isMe: boolean
   ): Phaser.GameObjects.Container {
     const container = this.track(this.add.container(x, y));
     const s = CHAR_SCALE;
 
     const gfx = this.add.graphics();
 
-    // Determine orientation based on seated angle
-    const rad = Phaser.Math.DegToRad(angle);
-    const isBack = Math.sin(rad) >= 0.1; // Sitting at the bottom, looking up towards center
-    const isLeft = Math.cos(rad) < -0.1; // Sitting at left, looking right
-    const isRight = Math.cos(rad) > 0.1; // Sitting at right, looking left
-
-    // Body
+    // ── Cuter Body (Rounded) ──
     gfx.fillStyle(highlightColor);
-    gfx.fillRect(-10 * s, -8 * s, 20 * s, 22 * s);
+    gfx.fillRoundedRect(-14 * s, -12 * s, 28 * s, 26 * s, 10 * s);
 
-    if (isBack) {
-      // OVER-THE-SHOULDER / BACK VIEW
-      // Draw head without eyes
-      gfx.fillStyle(0xd4a574);
-      gfx.fillCircle(0, -18 * s, 10 * s);
+    // ── Cuter Head (Bigger & Rounded) ──
+    gfx.fillStyle(0xffe0bd); // Softer skin tone
+    gfx.fillCircle(0, -22 * s, 13 * s);
 
-      // Arms slightly wrapped forward, no book shown (hidden by body/desk)
-      gfx.fillStyle(highlightColor, 0.85);
-      gfx.fillRect(-12 * s, 2 * s, 4 * s, 10 * s);
-      gfx.fillRect(8 * s, 2 * s, 4 * s, 10 * s);
-    } else {
-      // FRONT / SIDE-ISH VIEW
-      const lookOffsetX = isLeft ? 3 * s : (isRight ? -3 * s : 0);
-      const lookOffsetY = 2 * s; // Looking down at book
+    // ── Cute Face Details ──
+    // Blush
+    gfx.fillStyle(0xff8a80, 0.4);
+    gfx.fillCircle(-7 * s, -18 * s, 3.5 * s);
+    gfx.fillCircle(7 * s, -18 * s, 3.5 * s);
 
-      // Arms resting on desk
-      gfx.fillStyle(highlightColor, 0.85);
-      gfx.fillRect(-14 * s, 2 * s + lookOffsetY, 5 * s, 12 * s);
-      gfx.fillRect(9 * s, 2 * s + lookOffsetY, 5 * s, 12 * s);
+    // Eyes (Happy reading closed eyes)
+    gfx.lineStyle(1.5, 0x5d4037);
+    gfx.beginPath();
+    gfx.arc(-5 * s, -21 * s, 2.5 * s, Math.PI * 0.1, Math.PI * 0.9, false);
+    gfx.strokePath();
+    gfx.beginPath();
+    gfx.arc(5 * s, -21 * s, 2.5 * s, Math.PI * 0.1, Math.PI * 0.9, false);
+    gfx.strokePath();
+    
+    // Tiny mouth
+    gfx.beginPath();
+    gfx.arc(0, -15 * s, 1.5 * s, 0, Math.PI, false);
+    gfx.strokePath();
 
-      // Head (shifted slightly towards center)
-      gfx.fillStyle(0xd4a574);
-      gfx.fillCircle(lookOffsetX * 0.5, -18 * s + lookOffsetY * 0.5, 10 * s);
+    // ── Arms resting on desk ──
+    gfx.fillStyle(highlightColor, 0.9);
+    gfx.fillRoundedRect(-16 * s, 4 * s, 8 * s, 10 * s, 4 * s);
+    gfx.fillRoundedRect(8 * s, 4 * s, 8 * s, 10 * s, 4 * s);
+    
+    // Tiny hands
+    gfx.fillStyle(0xffe0bd);
+    gfx.fillCircle(-12 * s, 13 * s, 3 * s);
+    gfx.fillCircle(12 * s, 13 * s, 3 * s);
 
-      // Eyes (looking down, shifted towards center)
-      gfx.fillStyle(0x2c1810);
-      gfx.fillCircle(-3 * s + lookOffsetX, -17 * s + lookOffsetY, 1.5 * s);
-      gfx.fillCircle(3 * s + lookOffsetX, -17 * s + lookOffsetY, 1.5 * s);
-
-      // Book in front
-      const bookX = -8 * s + lookOffsetX * 1.5;
-      const bookY = 6 * s + lookOffsetY;
-      gfx.fillStyle(0xf5f5dc);
-      gfx.fillRect(bookX, bookY, 16 * s, 10 * s);
-      // Book spine
-      gfx.fillStyle(highlightColor, 0.7);
-      gfx.fillRect(bookX + 7 * s, bookY, 2 * s, 10 * s);
-    }
+    // ── Book in front ──
+    gfx.fillStyle(0xf5f5dc);
+    gfx.fillRoundedRect(-10 * s, 6 * s, 20 * s, 12 * s, 3 * s);
+    // Book spine
+    gfx.fillStyle(highlightColor, 0.7);
+    gfx.fillRoundedRect(-1.5 * s, 6 * s, 3 * s, 12 * s, 1 * s);
+    
+    // Book pages/lines (Cute detail)
+    gfx.fillStyle(0xe8e8c8);
+    gfx.fillRect(-8 * s, 9 * s, 6 * s, 1 * s);
+    gfx.fillRect(-8 * s, 12 * s, 5 * s, 1 * s);
+    gfx.fillRect(3 * s, 9 * s, 5 * s, 1 * s);
+    gfx.fillRect(2 * s, 12 * s, 6 * s, 1 * s);
 
     container.add(gfx);
 
-    // Name label
-    const label = this.add.text(0, -38 * s, name, {
-      fontSize: `${Math.round(13)}px`,
+    // ── Name label (bubble style) ──
+    const labelBg = this.add.graphics();
+    labelBg.fillStyle(0x000000, 0.3);
+    labelBg.fillRoundedRect(-20 * s, -45 * s, 40 * s, 16 * s, 6 * s);
+    container.add(labelBg);
+
+    const label = this.add.text(0, -37 * s, name, {
+      fontSize: `${Math.round(11)}px`,
       color: "#ffffff",
       fontFamily: "sans-serif",
+      fontStyle: "bold",
     });
-    label.setOrigin(0.5, 1);
+    label.setOrigin(0.5, 0.5);
     container.add(label);
 
-    // Sapling for "나"
+    // Sapling for "나" (cute animated sprout)
     if (isMe) {
       const sapling = this.add.graphics();
-      sapling.fillStyle(0x10b981);
-      sapling.fillRect(18 * s, -8 * s, 3 * s, 16 * s);
+      sapling.lineStyle(2, 0x10b981);
+      sapling.beginPath();
+      sapling.moveTo(0, -35 * s);
+      sapling.lineTo(2 * s, -42 * s);
+      sapling.strokePath();
+      
       sapling.fillStyle(0x34d399);
-      sapling.fillTriangle(19 * s, -18 * s, 13 * s, -6 * s, 26 * s, -6 * s);
+      sapling.fillCircle(4 * s, -44 * s, 3.5 * s);
+      sapling.fillCircle(-1 * s, -42 * s, 2.5 * s);
       container.add(sapling);
+
+      this.tweens.add({
+        targets: sapling,
+        angle: { from: -5, to: 5 },
+        scaleX: { from: 1, to: 1.1 },
+        duration: 1500,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.easeInOut",
+      });
     }
 
     return container;
   }
 
-  // ── Hourglass (Bezier bulb, above character head) ──
+  // ── Hourglass ──
 
-  /** Draw a cubic bezier on graphics from current pen position */
   private bezierTo(
     gfx: Phaser.GameObjects.Graphics,
     x0: number, y0: number,
@@ -460,7 +494,7 @@ export class ForestScene extends Phaser.Scene {
     const botBulbCp1Y = halfH * 0.5;
     const botBulbCp2Y = botCapY - halfH * 0.4;
 
-    // Glass bulb outline — left side
+    // Glass bulb outline
     gfx.lineStyle(1.5, glassColor, 0.7);
     gfx.beginPath();
     gfx.moveTo(-capW / 2, topCapY);
@@ -468,7 +502,6 @@ export class ForestScene extends Phaser.Scene {
     this.bezierTo(gfx, -neckW / 2, 0, -neckW / 2, botBulbCp1Y, -capW / 2, botBulbCp2Y, -capW / 2, botCapY);
     gfx.strokePath();
 
-    // Glass bulb outline — right side
     gfx.beginPath();
     gfx.moveTo(capW / 2, topCapY);
     this.bezierTo(gfx, capW / 2, topCapY, capW / 2, topBulbCp1Y, neckW / 2, topBulbCp2Y, neckW / 2, 0);
@@ -499,9 +532,8 @@ export class ForestScene extends Phaser.Scene {
     gfx.closePath();
     gfx.fillPath();
 
-    // Glass fill (semi-transparent)
+    // Glass fill 
     gfx.fillStyle(glassColor, 0.08);
-    // Top bulb fill
     gfx.beginPath();
     gfx.moveTo(-capW / 2, topCapY);
     this.bezierTo(gfx, -capW / 2, topCapY, -capW / 2, topBulbCp1Y, -neckW / 2, topBulbCp2Y, -neckW / 2, 0);
@@ -509,7 +541,6 @@ export class ForestScene extends Phaser.Scene {
     this.bezierTo(gfx, neckW / 2, 0, neckW / 2, topBulbCp2Y, capW / 2, topBulbCp1Y, capW / 2, topCapY);
     gfx.closePath();
     gfx.fillPath();
-    // Bottom bulb fill
     gfx.beginPath();
     gfx.moveTo(-neckW / 2, 0);
     this.bezierTo(gfx, -neckW / 2, 0, -neckW / 2, botBulbCp1Y, -capW / 2, botBulbCp2Y, -capW / 2, botCapY);
@@ -520,7 +551,6 @@ export class ForestScene extends Phaser.Scene {
 
     hgContainer.add(gfx);
 
-    // Sand grain particles falling through neck
     const sandGrains: Phaser.GameObjects.Graphics[] = [];
     if (active) {
       for (let i = 0; i < 3; i++) {
@@ -544,7 +574,6 @@ export class ForestScene extends Phaser.Scene {
         });
       }
 
-      // Glow pulse
       this.tweens.add({
         targets: hgContainer,
         alpha: { from: 0.85, to: 1 },
@@ -557,14 +586,18 @@ export class ForestScene extends Phaser.Scene {
       hgContainer.setAlpha(0.55);
     }
 
-    // Time text above hourglass
-    const timeText = this.add.text(0, -halfH - 10, `${minutes}분`, {
-      fontSize: "11px",
-      color: active ? "#ffd700" : "#888888",
+    const timeTextBg = this.add.graphics();
+    timeTextBg.fillStyle(0x000000, 0.5);
+    timeTextBg.fillRoundedRect(-14, -halfH - 18, 28, 12, 4);
+    hgContainer.add(timeTextBg);
+
+    const timeText = this.add.text(0, -halfH - 12, `${minutes}분`, {
+      fontSize: "10px",
+      color: active ? "#ffd700" : "#aaaaaa",
       fontFamily: "sans-serif",
       fontStyle: "bold",
     });
-    timeText.setOrigin(0.5, 1);
+    timeText.setOrigin(0.5, 0.5);
     hgContainer.add(timeText);
 
     this.hourglasses.push({ container: hgContainer, sandGrains, timeText, minutes, active });

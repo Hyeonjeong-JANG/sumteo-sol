@@ -10,6 +10,7 @@ const files = [
   { html: "pitch-deck-en-v2.html", pdf: "pitch-deck-en-v2.pdf" },
   { html: "pitch-deck-en-v3.html", pdf: "pitch-deck-en-v3.pdf" },
   { html: "pitch-deck-v3.html", pdf: "pitch-deck-v3.pdf" },
+  { html: "pitch-deck-v4.html", pdf: "pitch-deck-v4.pdf" },
 ];
 
 async function generatePdf(browser, htmlFile, outputFile) {
@@ -45,6 +46,11 @@ async function generatePdf(browser, htmlFile, outputFile) {
         const finishedBar = target.querySelector(".bar.finished");
         if (startedBar) startedBar.style.height = "200px";
         if (finishedBar) finishedBar.style.height = "48px";
+        // v4 uses .not-read / .read classes
+        const notReadBar = target.querySelector(".bar.not-read");
+        const readBar = target.querySelector(".bar.read");
+        if (notReadBar) notReadBar.style.height = "220px";
+        if (readBar) readBar.style.height = "50px";
       }
       // For demo slide, show characters entered with books on table
       if (idx === 3) {
