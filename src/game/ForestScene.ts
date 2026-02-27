@@ -17,6 +17,7 @@ interface SeatPosition {
   y: number;
   occupied: boolean;
   characterIndex: number | null;
+  angle: number;           // NEW: Circular angle
 }
 
 interface HourglassData {
@@ -29,8 +30,8 @@ interface HourglassData {
 
 const CHARACTER_DATA = [
   { name: "친구1", highlight: 0x8b6914, minutes: 42, active: true, seatIndex: 0 },
-  { name: "친구2", highlight: 0xc4841d, minutes: 67, active: false, seatIndex: 2 },
-  { name: "나", highlight: 0x10b981, minutes: 15, active: true, seatIndex: 3, isMe: true },
+  { name: "친구2", highlight: 0xc4841d, minutes: 67, active: false, seatIndex: 4 }, // Changed seatIndex for better distribution
+  { name: "나", highlight: 0x10b981, minutes: 15, active: true, seatIndex: 2, isMe: true }, // Changed seatIndex for front-ish view
 ];
 
 export class ForestScene extends Phaser.Scene {
@@ -153,106 +154,116 @@ export class ForestScene extends Phaser.Scene {
     tree.fillTriangle(x, y - 230 * scale, x - 30 * scale, y - 150 * scale, x + 30 * scale, y - 150 * scale);
   }
 
-  // ── Back Wall (simplified cabin replacement) ──
+  // ── Back Wall (Removed to focus on the central stump) ──
 
   private drawBackWall(w: number, h: number) {
-    const wallY = h * ZONE.BG.end - 40;
-    const wallW = w * 0.55;
-    const wallH = 50;
-    const wallX = (w - wallW) / 2;
-
-    const wall = this.track(this.add.graphics());
-
-    // Wooden planks
-    wall.fillStyle(0x3d2817, 0.7);
-    wall.fillRect(wallX, wallY, wallW, wallH);
-
-    // Plank lines
-    wall.lineStyle(1, 0x2a1c0e, 0.4);
-    for (let py = wallY + 10; py < wallY + wallH; py += 12) {
-      wall.beginPath();
-      wall.moveTo(wallX, py);
-      wall.lineTo(wallX + wallW, py);
-      wall.strokePath();
-    }
-
-    // Roof overhang
-    wall.fillStyle(0x5c3a21, 0.8);
-    wall.fillTriangle(
-      w / 2, wallY - 25,
-      wallX - 15, wallY + 2,
-      wallX + wallW + 15, wallY + 2
-    );
-
-    // Small window with warm light
-    const winX = w / 2 - 12;
-    const winY = wallY + 12;
-    wall.fillStyle(0xffd700, 0.8);
-    wall.fillRect(winX, winY, 24, 20);
-    wall.lineStyle(2, 0x5c3a21, 0.9);
-    wall.strokeRect(winX, winY, 24, 20);
-    wall.beginPath();
-    wall.moveTo(winX + 12, winY);
-    wall.lineTo(winX + 12, winY + 20);
-    wall.strokePath();
-
-    // Window glow
-    const glow = this.track(this.add.graphics());
-    glow.fillStyle(0xffd700, 0.12);
-    glow.fillCircle(w / 2, winY + 10, 35);
+    // Intentionally left blank to simplify the background and keep focus on the natural elements.
   }
 
-  // ── Shared Desk ──
+  // ── Shared Desk (Now a Tree Stump) ──
 
   private drawDesk(w: number, h: number) {
-    const deskW = w * DESK_WIDTH_RATIO;
-    const deskX = (w - deskW) / 2;
-    const deskY = h * 0.67;
-    const deskH = 10;
+    const cx = w / 2;
+    const cy = h * 0.72;
+    const deskR_X = Math.min(w * 0.22, 180);
+    const deskR_Y = deskR_X * 0.45;
+    const stumpHeight = 25;
 
     const desk = this.track(this.add.graphics());
 
     // Shadow
-    desk.fillStyle(0x000000, 0.15);
-    desk.fillRect(deskX + 4, deskY + 3, deskW, deskH);
+    desk.fillStyle(0x000000, 0.25);
+    desk.fillEllipse(cx, cy + stumpHeight + 8, deskR_X * 1.15, deskR_Y * 1.15);
 
-    // Table top
-    desk.fillStyle(0x6b4226);
-    desk.fillRect(deskX, deskY, deskW, deskH);
+    // Stump Bark (Sides)
+    desk.fillStyle(0x3d2314);
+    desk.fillRect(cx - deskR_X, cy, deskR_X * 2, stumpHeight);
+    
+    // Bottom curve of stump
+    desk.fillEllipse(cx, cy + stumpHeight, deskR_X, deskR_Y);
 
-    // Wood grain highlight
-    desk.fillStyle(0x7d5233, 0.6);
-    desk.fillRect(deskX, deskY, deskW, 3);
+    // Bark Texture (Lines on the side)
+    desk.lineStyle(2, 0x24140b, 0.6);
+    for (let i = 1; i < 9; i++) {
+        const lineX = cx - deskR_X + (deskR_X * 2 / 9) * i;
+        desk.beginPath();
+        desk.moveTo(lineX, cy + Math.random() * 5);
+        desk.lineTo(lineX + (Math.random()*4 - 2), cy + stumpHeight);
+        desk.strokePath();
+    }
 
-    // Desk legs
-    desk.fillStyle(0x4a2d14);
-    const legW = 6;
-    desk.fillRect(deskX + 12, deskY + deskH, legW, 28);
-    desk.fillRect(deskX + deskW - 18, deskY + deskH, legW, 28);
+    // Stump Top (Cut wood)
+    desk.fillStyle(0xcdae7e); // Lighter wood color
+    desk.fillEllipse(cx, cy, deskR_X, deskR_Y);
+
+    // Tree Rings (Age rings on top)
+    desk.lineStyle(1.5, 0xa58253, 0.5);
+    desk.beginPath();
+    desk.strokeEllipse(cx, cy, deskR_X * 0.85, deskR_Y * 0.85);
+    desk.strokeEllipse(cx, cy, deskR_X * 0.6, deskR_Y * 0.6);
+    desk.strokeEllipse(cx, cy, deskR_X * 0.35, deskR_Y * 0.35);
+    desk.strokeEllipse(cx, cy, deskR_X * 0.15, deskR_Y * 0.15);
+
+    // A small lantern in the center for cozy atmosphere
+    desk.fillStyle(0x222222);
+    desk.fillRect(cx - 8, cy - 12, 16, 12);
+    desk.fillStyle(0xffd700, 0.8); // lantern glow
+    desk.fillCircle(cx, cy - 6, 6);
+    desk.fillStyle(0xfff5e6);      // lantern core
+    desk.fillCircle(cx, cy - 6, 3);
+    desk.fillStyle(0x111111);      // lantern roof
+    desk.fillTriangle(cx, cy - 20, cx - 10, cy - 12, cx + 10, cy - 12);
+
+    // Ambient glow from the lantern
+    const glow = this.track(this.add.graphics());
+    glow.fillStyle(0xffd700, 0.15);
+    glow.fillCircle(cx, cy - 6, 45);
+
+    // Make sure the desk gets sorted correctly in depth (between top and bottom seated characters)
+    desk.setDepth(cy); 
   }
 
-  // ── Stools ──
+  // ── Stools (Arranged circularly around stump) ──
 
   private drawStools(w: number, h: number) {
-    const deskW = w * DESK_WIDTH_RATIO;
-    const deskX = (w - deskW) / 2;
-    const stoolY = h * 0.67 + 10 + 28 + 2; // below desk legs
+    const cx = w / 2;
+    const cy = h * 0.72;
+    const deskR_X = Math.min(w * 0.22, 180);
+    const deskR_Y = deskR_X * 0.45;
+    
+    const seatDistX = deskR_X + 40;
+    const seatDistY = deskR_Y + 30;
 
     this.seatPositions = [];
 
+    // Angles for circular arrangement
+    const angles = [
+      260, // 0: Top Left-ish
+      340, // 1: Top Right-ish
+      40,  // 2: Bottom Right-ish
+      90,  // 3: Bottom
+      140, // 4: Bottom Left-ish
+      200  // 5: Top Left
+    ];
+
     for (let i = 0; i < SEAT_COUNT; i++) {
-      const seatX = deskX + (deskW / (SEAT_COUNT + 1)) * (i + 1);
+      const rad = Phaser.Math.DegToRad(angles[i]);
+      const seatX = cx + Math.cos(rad) * seatDistX;
+      // Offset so stools in back are slightly higher up
+      const seatY = cy + Math.sin(rad) * seatDistY + (Math.sin(rad) < 0 ? -10 : 20);
+
       const charData = CHARACTER_DATA.find((c) => c.seatIndex === i);
       const occupied = !!charData;
 
       this.seatPositions.push({
         x: seatX,
-        y: stoolY,
+        y: seatY,
         occupied,
         characterIndex: charData ? CHARACTER_DATA.indexOf(charData) : null,
+        angle: angles[i],
       });
 
-      this.drawStool(seatX, stoolY, occupied);
+      this.drawStool(seatX, seatY, occupied);
     }
   }
 
@@ -260,25 +271,28 @@ export class ForestScene extends Phaser.Scene {
     const stool = this.track(this.add.graphics());
     const alpha = occupied ? 1 : 0.35;
 
-    // Stool seat (circular)
-    stool.fillStyle(0x5c3a21, alpha);
-    stool.fillCircle(x, y, 10);
-    stool.fillStyle(0x6b4226, alpha * 0.7);
-    stool.fillCircle(x, y - 1, 8);
-
-    // Single leg
+    // Stool seat (Logs)
     stool.fillStyle(0x3d2817, alpha);
-    stool.fillRect(x - 2, y + 8, 4, 14);
+    stool.fillRect(x - 8, y + 2, 16, 12); // Log side
+
+    stool.fillStyle(0x5c3a21, alpha);
+    stool.fillEllipse(x, y + 14, 16, 6); // Bottom of log
+    
+    stool.fillStyle(0xcdae7e, alpha * 0.8);
+    stool.fillEllipse(x, y + 2, 16, 8); // Top of log
+
+    stool.setDepth(y - 5);
 
     // Glow for empty seats (future touch hint)
     if (!occupied) {
       const glow = this.track(this.add.graphics());
-      glow.fillStyle(0xffd700, 0.06);
-      glow.fillCircle(x, y, 16);
+      glow.fillStyle(0xffd700, 0.08);
+      glow.fillCircle(x, y - 5, 18);
+      glow.setDepth(y - 5);
 
       this.tweens.add({
         targets: glow,
-        alpha: { from: 0.4, to: 0.9 },
+        alpha: { from: 0.2, to: 0.9 },
         duration: 2000,
         yoyo: true,
         repeat: -1,
@@ -290,14 +304,15 @@ export class ForestScene extends Phaser.Scene {
   // ── Characters ──
 
   private drawCharacters(w: number, h: number) {
-    const deskY = h * 0.67;
-
     CHARACTER_DATA.forEach((charData, idx) => {
       const seat = this.seatPositions[charData.seatIndex];
       if (!seat) return;
 
-      const charY = deskY - 8; // sit above desk
+      const charY = seat.y - 12; // sit on the stool
       const container = this.drawCharacter(seat.x, charY, charData.name, charData.highlight, !!charData.isMe);
+      
+      // Calculate depth based on Y position so bottom characters overlay top characters
+      container.setDepth(seat.y);
       this.characters.push(container);
 
       // Hourglass above head (inside character container)
