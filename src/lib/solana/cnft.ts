@@ -11,6 +11,7 @@ import {
   publicKey as toPublicKey,
   type Umi,
 } from "@metaplex-foundation/umi";
+import { irysUploader } from "@metaplex-foundation/umi-uploader-irys";
 import type { WalletContextState } from "@solana/wallet-adapter-react";
 
 const TREE_STORAGE_KEY = "sumteo_merkle_tree";
@@ -18,6 +19,7 @@ const TREE_STORAGE_KEY = "sumteo_merkle_tree";
 export function getUmi(endpoint: string, wallet: WalletContextState): Umi {
   return createUmi(endpoint)
     .use(walletAdapterIdentity(wallet))
+    .use(irysUploader())
     .use(mplBubblegum());
 }
 
@@ -42,6 +44,27 @@ export async function createReadingGarden(umi: Umi): Promise<string> {
   return treeAddress;
 }
 
+async function uploadMetadata(
+  umi: Umi,
+  bookTitle: string,
+  readingMinutes: number
+): Promise<string> {
+  const metadata = {
+    name: `${bookTitle}`.slice(0, 28) + " Tree",
+    symbol: "SUMTEO",
+    description: `Proof of Reading: "${bookTitle}" — ${readingMinutes} minutes on Sumteo`,
+    image: "",
+    attributes: [
+      { trait_type: "Book", value: bookTitle },
+      { trait_type: "Reading Minutes", value: readingMinutes },
+      { trait_type: "Platform", value: "Sumteo" },
+    ],
+  };
+
+  const uri = await umi.uploader.uploadJson(metadata);
+  return uri;
+}
+
 export async function mintReadingTree(
   umi: Umi,
   treeAddress: string,
@@ -50,13 +73,15 @@ export async function mintReadingTree(
 ): Promise<{ signature: string }> {
   const merkleTree = toPublicKey(treeAddress);
 
+  const metadataUri = await uploadMetadata(umi, bookTitle, readingMinutes);
+
   const result = await mintV1(umi, {
     leafOwner: umi.identity.publicKey,
     merkleTree,
     metadata: {
       name: `${bookTitle}`.slice(0, 28) + " Tree",
       symbol: "SUMTEO",
-      uri: `https://sumteo.xyz/api/nft/${encodeURIComponent(bookTitle)}.json`,
+      uri: metadataUri,
       sellerFeeBasisPoints: 0,
       collection: none(),
       creators: [
