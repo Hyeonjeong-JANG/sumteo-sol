@@ -28,10 +28,16 @@ interface HourglassData {
   active: boolean;
 }
 
-const CHARACTER_DATA = [
+const CHARACTER_DATA: Array<{
+  name: string;
+  highlight: number;
+  minutes: number;
+  active: boolean;
+  seatIndex: number;
+  isMe?: boolean;
+}> = [
   { name: "빵돌이", highlight: 0x8b6914, minutes: 42, active: true, seatIndex: 0 },
-  { name: "리누스", highlight: 0xc4841d, minutes: 67, active: false, seatIndex: 4 }, // Changed seatIndex for better distribution
-  { name: "최고의순대", highlight: 0x10b981, minutes: 15, active: true, seatIndex: 2, isMe: true }, // Changed seatIndex for front-ish view
+  { name: "리누스", highlight: 0xc4841d, minutes: 67, active: false, seatIndex: 4 },
 ];
 
 export class ForestScene extends Phaser.Scene {
@@ -39,6 +45,11 @@ export class ForestScene extends Phaser.Scene {
   private characters: Phaser.GameObjects.Container[] = [];
   private hourglasses: HourglassData[] = [];
   private seatPositions: SeatPosition[] = [];
+  private myCharacter: Phaser.GameObjects.Container | null = null;
+  private myHourglass: HourglassData | null = null;
+  private mySeatIndex: number | null = null;
+  private myTimerEvent: Phaser.Time.TimerEvent | null = null;
+  private myDemoTimerEvent: Phaser.Time.TimerEvent | null = null;
 
   constructor() {
     super({ key: "ForestScene" });
@@ -52,6 +63,11 @@ export class ForestScene extends Phaser.Scene {
       this.clearScene();
       this.drawScene(gameSize.width, gameSize.height);
     });
+
+    this.events.emit("scene-ready");
+    if (typeof window !== "undefined") {
+      (window as any).__forestScene = this;
+    }
   }
 
   private clearScene() {
@@ -593,5 +609,113 @@ export class ForestScene extends Phaser.Scene {
         ease: "Sine.easeInOut",
       });
     }
+  }
+
+  // ── Dynamic Character API ──
+
+  addMyCharacter(seatIndex: number = 1) {
+    const seat = this.seatPositions[seatIndex];
+    if (!seat || seat.occupied) return;
+
+    seat.occupied = true;
+    this.mySeatIndex = seatIndex;
+
+    const charY = seat.y - 12;
+    const container = this.drawCharacter(seat.x, charY, "최고의순대", 0x10b981, true, seat.angle);
+    container.setDepth(seat.y);
+    container.setAlpha(0);
+    this.track(container);
+    this.characters.push(container);
+    this.myCharacter = container;
+
+    // Fade in
+    this.tweens.add({
+      targets: container,
+      alpha: 1,
+      duration: 600,
+      ease: "Quad.easeOut",
+    });
+
+    // Breathing
+    this.tweens.add({
+      targets: container,
+      y: container.y - 2,
+      duration: 2000,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.easeInOut",
+    });
+
+    // Hourglass starting at 0 min
+    this.drawHourglassAboveHead(container, 0, true);
+    this.myHourglass = this.hourglasses[this.hourglasses.length - 1];
+
+    this.startMyTimer();
+    this.events.emit("seat-joined", seatIndex);
+  }
+
+  startMyTimer() {
+    if (this.myTimerEvent) this.myTimerEvent.destroy();
+
+    this.myTimerEvent = this.time.addEvent({
+      delay: 60000, // every minute (real time)
+      callback: () => {
+        if (!this.myHourglass) return;
+        this.myHourglass.minutes++;
+        this.myHourglass.timeText.setText(`${this.myHourglass.minutes}분`);
+      },
+      loop: true,
+    });
+
+    // Also tick once quickly for demo feel (every 3 seconds for demo)
+    if (this.myDemoTimerEvent) this.myDemoTimerEvent.destroy();
+    this.myDemoTimerEvent = this.time.addEvent({
+      delay: 3000,
+      callback: () => {
+        if (!this.myHourglass) return;
+        this.myHourglass.minutes++;
+        this.myHourglass.timeText.setText(`${this.myHourglass.minutes}분`);
+      },
+      loop: true,
+    });
+  }
+
+  removeMyCharacter() {
+    if (this.myTimerEvent) {
+      this.myTimerEvent.destroy();
+      this.myTimerEvent = null;
+    }
+    if (this.myDemoTimerEvent) {
+      this.myDemoTimerEvent.destroy();
+      this.myDemoTimerEvent = null;
+    }
+
+    if (this.myCharacter) {
+      this.tweens.add({
+        targets: this.myCharacter,
+        alpha: 0,
+        duration: 400,
+        ease: "Quad.easeIn",
+        onComplete: () => {
+          if (this.myCharacter) {
+            this.myCharacter.destroy();
+            this.myCharacter = null;
+          }
+        },
+      });
+    }
+
+    if (this.mySeatIndex !== null) {
+      const seat = this.seatPositions[this.mySeatIndex];
+      if (seat) seat.occupied = false;
+      this.events.emit("seat-left", this.mySeatIndex);
+      this.mySeatIndex = null;
+    }
+
+    this.myHourglass = null;
+  }
+
+  getMyMinutes(): number {
+    return this.myHourglass?.minutes ?? 0;
   }
 }

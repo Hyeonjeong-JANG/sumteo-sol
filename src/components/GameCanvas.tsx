@@ -27,6 +27,7 @@ export function GameCanvas() {
           mode: Phaser.Scale.RESIZE,
           autoCenter: Phaser.Scale.CENTER_BOTH,
         },
+        input: false,
       };
 
       gameRef.current = new Phaser.Game(config);
@@ -45,7 +46,7 @@ export function GameCanvas() {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 -z-10"
+      className="absolute inset-0 -z-10 pointer-events-none"
       style={{ minHeight: "100vh" }}
     />
   );
