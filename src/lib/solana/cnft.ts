@@ -33,6 +33,7 @@ export async function createReadingGarden(umi: Umi): Promise<string> {
     merkleTree,
     maxDepth: 3,
     maxBufferSize: 8,
+    public: true,
   });
   await builder.sendAndConfirm(umi, { confirm: { commitment: "confirmed" } });
 
@@ -55,19 +56,7 @@ export async function mintReadingTree(
     metadata: {
       name: `${bookTitle}`.slice(0, 28) + " Tree",
       symbol: "SUMTEO",
-      uri: `data:application/json,${encodeURIComponent(
-        JSON.stringify({
-          name: `${bookTitle} - Reading Tree`,
-          symbol: "SUMTEO",
-          description: `A tree grown from ${readingMinutes} minutes of focused reading on "${bookTitle}". Minted on Sumteo Reading Garden.`,
-          image: "",
-          attributes: [
-            { trait_type: "Book", value: bookTitle },
-            { trait_type: "Reading Minutes", value: readingMinutes },
-            { trait_type: "Minted At", value: new Date().toISOString() },
-          ],
-        })
-      )}`,
+      uri: `https://sumteo.xyz/api/nft/${encodeURIComponent(bookTitle)}.json`,
       sellerFeeBasisPoints: 0,
       collection: none(),
       creators: [
