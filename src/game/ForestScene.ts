@@ -30,14 +30,15 @@ interface HourglassData {
 
 const CHARACTER_DATA: Array<{
   name: string;
+  nameEn?: string;
   highlight: number;
   minutes: number;
   active: boolean;
   seatIndex: number;
   isMe?: boolean;
 }> = [
-  { name: "빵돌이", highlight: 0x8b6914, minutes: 42, active: true, seatIndex: 0 },
-  { name: "리누스", highlight: 0xc4841d, minutes: 67, active: false, seatIndex: 4 },
+  { name: "빵돌이", nameEn: "BreadBoy", highlight: 0x8b6914, minutes: 42, active: true, seatIndex: 0 },
+  { name: "리누스", nameEn: "Linus", highlight: 0xc4841d, minutes: 67, active: false, seatIndex: 4 },
 ];
 
 export class ForestScene extends Phaser.Scene {
@@ -50,12 +51,14 @@ export class ForestScene extends Phaser.Scene {
   private mySeatIndex: number | null = null;
   private myTimerEvent: Phaser.Time.TimerEvent | null = null;
   private myDemoTimerEvent: Phaser.Time.TimerEvent | null = null;
+  private isEn = false;
 
   constructor() {
     super({ key: "ForestScene" });
   }
 
   create() {
+    this.isEn = typeof window !== "undefined" && window.location.pathname.includes("-en");
     const { width, height } = this.scale;
     this.drawScene(width, height);
 
@@ -314,7 +317,8 @@ export class ForestScene extends Phaser.Scene {
       if (!seat) return;
 
       const charY = seat.y - 12; // sit on the stool
-      const container = this.drawCharacter(seat.x, charY, charData.name, charData.highlight, !!charData.isMe, seat.angle);
+      const displayName = this.isEn && charData.nameEn ? charData.nameEn : charData.name;
+      const container = this.drawCharacter(seat.x, charY, displayName, charData.highlight, !!charData.isMe, seat.angle);
       
       // Calculate depth based on Y position so bottom characters overlay top characters
       container.setDepth(seat.y);
@@ -574,7 +578,7 @@ export class ForestScene extends Phaser.Scene {
     }
 
     // Time text above hourglass
-    const timeText = this.add.text(0, -halfH - 10, `${minutes}분`, {
+    const timeText = this.add.text(0, -halfH - 10, `${minutes}${this.isEn ? "min" : "분"}`, {
       fontSize: "11px",
       color: active ? "#ffd700" : "#888888",
       fontFamily: "sans-serif",
@@ -621,7 +625,8 @@ export class ForestScene extends Phaser.Scene {
     this.mySeatIndex = seatIndex;
 
     const charY = seat.y - 12;
-    const container = this.drawCharacter(seat.x, charY, "최고의순대", 0x10b981, true, seat.angle);
+    const myName = this.isEn ? "sooondae" : "최고의순대";
+    const container = this.drawCharacter(seat.x, charY, myName, 0x10b981, true, seat.angle);
     container.setDepth(seat.y);
     container.setAlpha(0);
     this.track(container);
@@ -662,7 +667,7 @@ export class ForestScene extends Phaser.Scene {
       callback: () => {
         if (!this.myHourglass) return;
         this.myHourglass.minutes++;
-        this.myHourglass.timeText.setText(`${this.myHourglass.minutes}분`);
+        this.myHourglass.timeText.setText(`${this.myHourglass.minutes}${this.isEn ? "min" : "분"}`);
       },
       loop: true,
     });
@@ -674,7 +679,7 @@ export class ForestScene extends Phaser.Scene {
       callback: () => {
         if (!this.myHourglass) return;
         this.myHourglass.minutes++;
-        this.myHourglass.timeText.setText(`${this.myHourglass.minutes}분`);
+        this.myHourglass.timeText.setText(`${this.myHourglass.minutes}${this.isEn ? "min" : "분"}`);
       },
       loop: true,
     });
